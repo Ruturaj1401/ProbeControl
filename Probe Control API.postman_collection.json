@@ -1,0 +1,240 @@
+{
+	"info": {
+		"_postman_id": "a8aaf46b-d141-4cba-8f51-b134a0552c29",
+		"name": "Probe Control API",
+		"description": "Spring Boot-based REST API for controlling a submersible probe on a grid. The probe can move forward, backward, turn left, turn right, and avoid obstacles while staying within the grid boundaries.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29353640"
+	},
+	"item": [
+		{
+			"name": "Examples",
+			"item": [
+				{
+					"name": "Basic Movement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"forward\", \"forward\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/probe/commands",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"probe",
+								"commands"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obstacle Encounter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\"forward\", \"forward\", \"right\", \"forward\"]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/probe/commands",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"probe",
+								"commands"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Send Commands",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. Verify HTTP status\r",
+							"pm.test(\"Status code is 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. Check response structure\r",
+							"const json = pm.response.json();\r",
+							"pm.test(\"Valid response format\", () => {\r",
+							"    pm.expect(json).to.have.keys([\"status\", \"message\", \"position\", \"direction\", \"visited\"]);\r",
+							"});\r",
+							"\r",
+							"// 3. Validate probe movement\r",
+							"pm.test(\"Position updated correctly\", () => {\r",
+							"    const visited = json.visited;\r",
+							"    const lastPosition = visited[visited.length - 1];\r",
+							"    pm.expect(json.position).to.eql(lastPosition);\r",
+							"});\r",
+							"\r",
+							"// 4. Store direction for future requests\r",
+							"pm.environment.set(\"last_direction\", json.direction);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\"forward\", \"right\"]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/probe/commands",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"probe",
+						"commands"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Summary",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 1. Verify HTTP status is successful\r",
+							"pm.test(\"Status code is 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// 2. Validate response structure\r",
+							"pm.test(\"Response has required fields\", () => {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json).to.have.keys([\r",
+							"        \"status\", \r",
+							"        \"message\", \r",
+							"        \"position\", \r",
+							"        \"direction\", \r",
+							"        \"visited\"\r",
+							"    ]);\r",
+							"});\r",
+							"\r",
+							"// 3. Check position is within grid bounds (0-9)\r",
+							"pm.test(\"Position is within valid grid range\", () => {\r",
+							"    const { x, y } = pm.response.json().position;\r",
+							"    pm.expect(x).to.be.within(0, 9);\r",
+							"    pm.expect(y).to.be.within(0, 9);\r",
+							"});\r",
+							"\r",
+							"// 4. Validate direction is a cardinal value\r",
+							"pm.test(\"Direction is valid\", () => {\r",
+							"    const validDirections = [\"NORTH\", \"EAST\", \"SOUTH\", \"WEST\"];\r",
+							"    pm.expect(validDirections).to.include(\r",
+							"        pm.response.json().direction\r",
+							"    );\r",
+							"});\r",
+							"\r",
+							"// 5. Verify visited path consistency\r",
+							"pm.test(\"Visited path includes current position\", () => {\r",
+							"    const json = pm.response.json();\r",
+							"    const lastVisited = json.visited[json.visited.length - 1];\r",
+							"    pm.expect(json.position).to.eql(lastVisited);\r",
+							"});\r",
+							"\r",
+							"// 6. Cross-check with previous command execution (if available)\r",
+							"if (pm.environment.get(\"last_position\")) {\r",
+							"    pm.test(\"Matches last known position\", () => {\r",
+							"        const expectedPos = JSON.parse(pm.environment.get(\"last_position\"));\r",
+							"        pm.expect(pm.response.json().position).to.eql(expectedPos);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"// 7. Store summary data for debugging\r",
+							"console.log(\"Probe summary:\", pm.response.json());"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/probe/summary",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"probe",
+						"summary"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
