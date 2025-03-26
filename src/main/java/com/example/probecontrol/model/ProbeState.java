@@ -1,35 +1,40 @@
 package com.example.probecontrol.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProbeState {
-    private Position position = new Position(0, 0);
-    private Direction direction = Direction.NORTH;
-    private final List<Position> visited = new ArrayList<>();
+    private Position position;
+    private Direction direction;
+    private List<Position> visited;
 
-    public ProbeState() {
-        visited.add(position);
+    public ProbeState(Position position, Direction direction, List<Position> visited) {
+        this.position = position;
+        this.direction = direction;
+        this.visited = visited;
     }
 
+    // Getters and setters
     public Position getPosition() {
         return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
     }
 
     public Direction getDirection() {
         return direction;
     }
 
-    public List<Position> getVisited() {
-        return new ArrayList<>(visited);
-    }
-
-    public void setPosition(Position position) {
-        this.position = position;
-        this.visited.add(position);
-    }
-
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public List<Position> getVisited() {
+        return visited;
+    }
+
+    public void setVisited(List<Position> visited) {
+        this.visited = visited;
     }
 }

@@ -36,11 +36,14 @@ public class ProbeController {
                 state.getPosition(), state.getDirection(), state.getVisited());
     }
 
-    private record Response(
+
+    public record Response(
             String status,
             String message,
             Position position,
             Direction direction,
             List<Position> visited
     ) {}
+
+
 }

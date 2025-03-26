@@ -5,6 +5,7 @@ import com.example.probecontrol.model.Position;
 import com.example.probecontrol.model.ProbeState;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +16,11 @@ public class ProbeService {
     private static final int GRID_HEIGHT = 10;
     private static final Set<String> OBSTACLES = new HashSet<>(Set.of("2,2", "3,5", "7,8"));
 
-    private final ProbeState probeState = new ProbeState();
+    private final ProbeState probeState = new ProbeState(
+            new Position(0, 0), // Initial position
+            Direction.NORTH,    // Initial direction
+            new ArrayList<>()   // Initial visited list
+    );
 
     public ProbeState executeCommands(List<String> commands) {
         for (String command : commands) {
