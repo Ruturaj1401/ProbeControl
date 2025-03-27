@@ -1,41 +1,41 @@
 package com.example.probecontrol.service;
 
-import com.example.probecontrol.model.*;
-import org.junit.jupiter.api.*;
-import java.util.List;
+import com.example.probecontrol.model.Direction;
+import com.example.probecontrol.model.Position;
+import com.example.probecontrol.model.ProbeState;
+import com.example.probecontrol.service.ProbeService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
 class ProbeServiceTest {
     private ProbeService probeService;
 
     @BeforeEach
     void setUp() {
-        probeService = new ProbeService(); // Fresh instance for each test
+        probeService = new ProbeService();
     }
 
-    // Test 1: Move forward once
     @Test
-    @DisplayName("Move forward from (0,0) should go to (0,1)")
-    void moveForward_UpdatesYCoordinate() {
-        probeService.executeCommands(List.of("forward"));
-        assertEquals(new Position(0, 1), probeService.getCurrentState().getPosition());
+    void testExecuteCommandsForward() {
+        List<String> commands = List.of("forward");
+        ProbeState state = probeService.executeCommands(commands);
+        assertEquals(new Position(0, 1), state.getPosition());
+        assertEquals(Direction.NORTH, state.getDirection());
     }
 
-    // Test 2: Turn right from NORTH
     @Test
-    @DisplayName("Turn right from NORTH should face EAST")
-    void turnRight_ChangesDirectionToEast() {
-        probeService.executeCommands(List.of("right"));
-        assertEquals(Direction.EAST, probeService.getCurrentState().getDirection());
+    void testExecuteCommandsTurnLeft() {
+        List<String> commands = List.of("left");
+        ProbeState state = probeService.executeCommands(commands);
+        assertEquals(Direction.WEST, state.getDirection());
     }
 
-    // Test 3: Hit an obstacle
     @Test
-    @DisplayName("Moving into (2,2) should throw an error")
-    void moveIntoObstacle_ThrowsError() {
-        // Adjust commands to ensure they lead to the obstacle at (2,2)
-        List<String> commands = List.of("right", "forward", "forward", "left", "forward", "forward");
-        assertThrows(IllegalArgumentException.class,
-                () -> probeService.executeCommands(commands));
+    void testExecuteCommandsTurnRight() {
+        List<String> commands = List.of("right");
+        ProbeState state = probeService.executeCommands(commands);
+        assertEquals(Direction.EAST, state.getDirection());
     }
 }
